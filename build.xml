@@ -1,0 +1,42 @@
+<project name="SimonSays" default="compile" basedir=".">
+
+  <description>SimonSays</description>
+
+  <property name="src" location="src" />
+  <property name="gen" location="gen-java" />
+  <property name="build" location="build" />
+  <property name="thrift_home" location="/Users/toby/Downloads/thrift-0.6.1" />
+
+  <path id="libs.classpath">
+    <pathelement path="${thrift_home}/lib/java/build/libthrift-0.6.1-snapshot.jar" />
+    <pathelement path="${basedir}/slf4j-1.6.1/slf4j-api-1.6.1.jar" />
+    <!--fileset dir="{thrift_home}/lib/java/build/ivy/lib">
+      <include name="*.jar" />
+    </fileset-->
+  </path>
+
+  <path id="build.classpath">
+    <path refid="libs.classpath" />
+    <pathelement path="${gen}" />
+  </path>
+
+  <target name="init">
+    <tstamp />
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${gen}" destdir="${build}" classpathref="libs.classpath" includeantruntime="false" />
+    <javac srcdir="${src}" destdir="${build}" classpathref="build.classpath" includeantruntime="false" />
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar jarfile="simonsays.jar" basedir="${build}"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}" />
+    <delete file="simonsays.jar" />
+  </target>
+
+</project>

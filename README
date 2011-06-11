@@ -1,0 +1,28 @@
+This will be an implementation of the client and server for the SimonSays service
+described in this Facebook puzzle: http://www.facebook.com/careers/puzzles.php?puzzle_id=13
+
+Since the puzzle server is down, I decided to try to implement the server side as well.
+
+'make run-server' should build and run the 'simple' (non-ssl) server.
+
+Requires:
+ - thrift source code distribution, http://thrift.apache.org/download/
+ - Simple Logging Facade for Java, http://www.slf4j.org/download.html
+
+
+
+# Copyright (C) 2011 Toby Thain, toby@telegraphics.com.au
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by  
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License  
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
