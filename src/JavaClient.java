@@ -25,7 +25,11 @@ import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 
+import java.util.*;
+
 public class JavaClient {
+  static boolean perfectPlay = false;
+
   public static void main(String [] args) {
 
     if (args.length != 1) {
@@ -68,36 +72,31 @@ public class JavaClient {
 
   private static void perform(SimonSays.Client client) throws TException
   {
-/*
-    client.ping();
-    System.out.println("ping()");
-
-    int sum = client.add(1,1);
-    System.out.println("1+1=" + sum);
-
-    Work work = new Work();
-
-    work.op = Operation.DIVIDE;
-    work.num1 = 1;
-    work.num2 = 0;
-    try {
-      int quotient = client.calculate(1, work);
-      System.out.println("Whoa we can divide by 0");
-    } catch (InvalidOperation io) {
-      System.out.println("Invalid operation: " + io.why);
-    }
-
-    work.op = Operation.SUBTRACT;
-    work.num1 = 15;
-    work.num2 = 10;
-    try {
-      int diff = client.calculate(1, work);
-      System.out.println("15-10=" + diff);
-    } catch (InvalidOperation io) {
-      System.out.println("Invalid operation: " + io.why);
-    }
-    SharedStruct log = client.getStruct(1);
-    System.out.println("Check log: " + log.value);
-*/
+	  if(client.registerClient("thriftwork@telegraphics.com.au")){
+		  System.out.println("starting the game!");
+		  do{
+			  System.out.println("new turn...");
+			  if(perfectPlay){
+				  List<Color> colours = client.startTurn();
+				  for(Color c : colours){
+					  System.out.println("  echoing colour "+c);
+					  client.chooseColor(c);
+				  }
+			  }else{
+				  List<Color> colours = client.startTurn();
+				  double p = 0.99;
+				  for(Color c : colours){
+					  if(Math.random() > p)
+						  c = Color.findByValue((int)Math.ceil(Color.values().length*Math.random()));
+					  System.out.println("  trying colour "+c);
+					  client.chooseColor(c);
+					  p *= 0.95; // chance of a mistake increases after each choice
+				  }
+			  }
+		  }while(!client.endTurn());
+		  System.out.println("finished the game!");
+		  System.out.println("winGame key: " + client.winGame());
+	  }else
+		  System.err.println("failed to register");
   }
 }

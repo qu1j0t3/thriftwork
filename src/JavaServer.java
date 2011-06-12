@@ -17,20 +17,12 @@
  * under the License.
  */
 
+import org.apache.thrift.*;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TServer.Args;
 import org.apache.thrift.server.TSimpleServer;
-import org.apache.thrift.server.TThreadPoolServer;
-import org.apache.thrift.transport.TSSLTransportFactory;
-import org.apache.thrift.transport.TServerSocket;
-import org.apache.thrift.transport.TServerTransport;
+import org.apache.thrift.transport.*;
 import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
-
-// Generated code
-//import tutorial.*;
-//import shared.*;
-
-import java.util.HashMap;
 
 public class JavaServer {
 
@@ -47,15 +39,16 @@ public class JavaServer {
         public void run() {
           simple(processor);
         }
-      };      
+      };
+/*
       Runnable secure = new Runnable() {
         public void run() {
           secure(processor);
         }
       };
-
+      new Thread(secure).start();
+*/
       new Thread(simple).start();
-//      new Thread(secure).start();
     } catch (Exception x) {
       x.printStackTrace();
     }
@@ -64,7 +57,13 @@ public class JavaServer {
   public static void simple(SimonSays.Processor processor) {
     try {
       TServerTransport serverTransport = new TServerSocket(9090);
-      TServer server = new TSimpleServer(new Args(serverTransport).processor(processor));
+      TServer server = new TSimpleServer(new Args(serverTransport).processorFactory(
+    		  new TProcessorFactory(null){
+    			  public TProcessor getProcessor(TTransport trans){
+    				  return new SimonSays.Processor(new SimonSaysHandler());
+    			  }
+    		  }
+      ));
 
       // Use this for a multithreaded server
       // TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
