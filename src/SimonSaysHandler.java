@@ -26,77 +26,101 @@ public class SimonSaysHandler implements SimonSays.Iface {
 	protected String clientKey;
 	protected int turns = 0;
 	protected boolean winState = false;
-	protected int gameTurns;
+	protected boolean inTurn;
+	protected int winColours;
 	protected int coloursReturned;
 	protected ArrayList<Color> turnColours;
 	
 	protected static HashMap<String,SimonSaysHandler> games = new HashMap<String,SimonSaysHandler>();
 
-    public boolean registerClient(String email) throws org.apache.thrift.TException {
+	protected void checkRegistered() throws TException {
+		if(clientKey == null)
+			throw new TException("client did not register");
+	}
+	
+    public boolean registerClient(String email) throws TException {
     	if(games.containsKey(email)){
     		System.err.println("cannot register "+email+": already registered");
     		return false;
     	}
     	clientKey = email;
-    	gameTurns = 3 + (int)Math.floor(4*Math.random());
-    	resetTurn();
     	games.put(email, this);
-
     	System.out.println("registered client: "+email+" handler obj: "+this);
-    	System.out.println("game will have "+gameTurns+" turns");
+
+    	winColours = 5 + (int)Math.floor(3*Math.random());
+    	resetTurn();
+    	System.out.println("must replay "+winColours+" colours to win");
+
         return true;
     }
     
     protected void resetTurn(){
-    	coloursReturned = 0;
+    	turnColours = new ArrayList<Color>();
+    	inTurn = false;
     }
 
-    public List<Color> startTurn() throws org.apache.thrift.TException {
-    	if(turnColours == null)
-	    	turnColours = new ArrayList<Color>();
+    public List<Color> startTurn() throws TException {
+    	checkRegistered();
+
+    	if(inTurn)
+    		resetTurn(); //throw new TException("startTurn without endTurn");
 
 		Color c = Color.findByValue((int)Math.ceil(Math.random()*Color.values().length));
 		turnColours.add(c);
 
 		System.out.print("turn #" + turns + ", sending colours:");
-		for(Color col : turnColours){
-    		System.out.print(" "+col);
-    	}
+		for(Color col : turnColours)
+    		System.out.print(" " + col);
     	System.out.println();
+
+    	inTurn = true;
+    	coloursReturned = 0;
         return turnColours;
     }
 
-    public boolean chooseColor(Color colorChosen) throws org.apache.thrift.TException {
+    public boolean chooseColor(Color colorChosen) throws TException {
+    	checkRegistered();
+
+    	if(!inTurn)
+    		throw new TException("chooseColor without startTurn");
+
     	// are we still expecting a colour?
-    	if(coloursReturned < turnColours.size()){
+    	if(inTurn && coloursReturned < turnColours.size()){
     		// did client give correct colour in sequence?
 	        if(colorChosen == turnColours.get(coloursReturned)){
 	        	++coloursReturned;
-	        	System.out.println("  client responded with correct colour: "+colorChosen);
+	        	System.out.println("  client said correct colour: " + colorChosen);
 	        	// is this turn finished?
 	        	if(coloursReturned == turnColours.size()){
 	        		++turns;
-	        		resetTurn();
 	        		System.out.println("turn complete");
 	        	}
 	        	return true;
+	        }else{
+	        	System.out.println("  client said wrong colour: " + colorChosen);
 	        }
     	}
       	resetTurn();
         return false;
     }
 
-    public boolean endTurn() throws org.apache.thrift.TException {
-    	return winState = turns == gameTurns;
+    public boolean endTurn() throws TException {
+    	checkRegistered();
+
+    	if(!inTurn)
+    		resetTurn(); // throw new TException("endTurn without startTurn");
+
+    	inTurn = false;
+    	return winState = coloursReturned == winColours;
     }
 
-    public String winGame() throws org.apache.thrift.TException {
-    	if(winState){
-	    	games.remove(clientKey);
-	    	System.out.println("de-registered client: "+clientKey);
-	        return "you won a game";
-    	}
-    	throw new TException("winGame called but game hasn't been won");
+    public String winGame() throws TException {
+    	checkRegistered();
+
+    	games.remove(clientKey);
+    	System.out.println("de-registered client: "+clientKey);
+    	clientKey = null;
+    	return winState ? "you won a game" : "you didn't win";
     }
 }
 

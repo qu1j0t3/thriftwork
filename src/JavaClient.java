@@ -28,7 +28,7 @@ import org.apache.thrift.protocol.TProtocol;
 import java.util.*;
 
 public class JavaClient {
-  static boolean perfectPlay = false;
+  static boolean perfectPlay = true;
 
   public static void main(String [] args) {
 
@@ -75,21 +75,29 @@ public class JavaClient {
 	  if(client.registerClient("thriftwork@telegraphics.com.au")){
 		  System.out.println("starting the game!");
 		  do{
-			  System.out.println("new turn...");
+			  System.out.print("new turn... received <");
+			  List<Color> colours = client.startTurn();
+			  for(Color c : colours)
+				  System.out.print(" "+c);
+			  System.out.println(" >");
+
 			  if(perfectPlay){
-				  List<Color> colours = client.startTurn();
 				  for(Color c : colours){
 					  System.out.println("  echoing colour "+c);
 					  client.chooseColor(c);
 				  }
 			  }else{
-				  List<Color> colours = client.startTurn();
 				  double p = 0.99;
 				  for(Color c : colours){
 					  if(Math.random() > p)
 						  c = Color.findByValue((int)Math.ceil(Color.values().length*Math.random()));
-					  System.out.println("  trying colour "+c);
-					  client.chooseColor(c);
+					  System.out.print("  trying colour "+c);
+					  if(client.chooseColor(c)){
+						  System.out.println(" ...ok");
+					  }else{
+						  System.out.println(" ...oops");
+						  break;
+					  }
 					  p *= 0.95; // chance of a mistake increases after each choice
 				  }
 			  }
