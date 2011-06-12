@@ -22,9 +22,7 @@ THRIFT    = $(THRIFTDIR)/compiler/cpp/thrift
 CLASSPATH = $(THRIFTJAR):build:slf4j-1.6.1/slf4j-api-1.6.1.jar:slf4j-1.6.1/slf4j-simple-1.6.1.jar 
 
 
-gen-java/SimonSays.class : gen-java/SimonSays.java ; ant
-build/JavaClient.class : gen-java/SimonSays.class src/JavaClient.java ; ant
-build/JavaServer.class : gen-java/SimonSays.class src/JavaServer.java ; ant
+build/%.class : gen-java/SimonSays.java src/%.java ; ant
 
 # the Java needs stripping of 1.6-isms to build with my on my javac 1.5.0_19
 gen-java/SimonSays.java : simonsays.thrift
