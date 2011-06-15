@@ -21,6 +21,11 @@ THRIFTJAR = $(THRIFTDIR)/lib/java/build/libthrift-0.6.1-snapshot.jar
 THRIFT    = $(THRIFTDIR)/compiler/cpp/thrift
 CLASSPATH = $(THRIFTJAR):build:slf4j-1.6.1/slf4j-api-1.6.1.jar:slf4j-1.6.1/slf4j-simple-1.6.1.jar 
 
+all : run-server.sh run-client.sh
+	# To start server,
+	#     $ ./run-server.sh
+	# To run the client,
+	#     $ ./run-client.sh
 
 build/%.class : gen-java/SimonSays.java src/%.java ; ant
 
@@ -29,11 +34,13 @@ gen-java/SimonSays.java : simonsays.thrift
 	$(THRIFT) -r --gen java $<
 	sed -i.bak -e /@Override/d -e 's/IOException(te)/IOException()/' $@
 
-run-server : build/JavaServer.class
-	java -cp $(CLASSPATH) JavaServer
+run-server.sh : build/JavaServer.class
+	( echo "#!`which bash`"; echo java -cp $(CLASSPATH) JavaServer ) > $@
+	chmod +x $@
 
-run-client : build/JavaClient.class
-	java -cp $(CLASSPATH) JavaClient simple
+run-client.sh : build/JavaClient.class
+	( echo "#!`which bash`"; echo java -cp $(CLASSPATH) JavaClient simple ) > $@
+	chmod +x $@
 
 # the Ruby bindings don't build on my OS X 10.4.11 system
 $(THRIFTDIR)/Makefile :
